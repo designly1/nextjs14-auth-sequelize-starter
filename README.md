@@ -1,3 +1,5 @@
+# Next.js 14 Auth + Sequelize Starter
+
 This is a starter boilerplate for Next.js 14. It had everything you need to kickstart an app with full authentication.
 
 ## Features
