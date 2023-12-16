@@ -1,0 +1,14 @@
+{
+  "printWidth": 120,
+  "tabWidth": 5,
+  "useTabs": true,
+  "semi": true,
+  "singleQuote": true,
+  "trailingComma": "all",
+  "bracketSpacing": true,
+  "jsxBracketSameLine": false,
+  "arrowParens": "avoid",
+  "quoteProps": "as-needed",
+  "singleAttributePerLine": false,
+  "jsxSingleQuote": false
+}
