@@ -13,6 +13,14 @@ function matchesWildcard(path: string, pattern: string): boolean {
 	return path === pattern;
 }
 
+// Function to delete auth cookies and redirect
+function deleteCookiesAndRedirect(url: string) {
+	const response = NextResponse.redirect(url);
+	response.cookies.delete('token');
+	response.cookies.delete('userData');
+	return response;
+}
+
 export async function middleware(request: NextRequest) {
 	// Shortcut for our login path redirect
 	// Note: you must use absolute URLs for middleware redirects
@@ -34,15 +42,13 @@ export async function middleware(request: NextRequest) {
 		}
 		// If no token exists, redirect to login
 		if (!token) {
-			return NextResponse.redirect(LOGIN);
+			return deleteCookiesAndRedirect(LOGIN);
 		}
 		try {
 			// Decode and verify JWT cookie
 			const payload = await verifyJwtToken(token.value);
 			if (!payload) {
-				// Delete token
-				request.cookies.delete('token');
-				return NextResponse.redirect(LOGIN);
+				return deleteCookiesAndRedirect(LOGIN);
 			}
 			// If you have an admin role and path, secure it here
 			if (request.nextUrl.pathname.startsWith('/admin')) {
@@ -51,9 +57,8 @@ export async function middleware(request: NextRequest) {
 				}
 			}
 		} catch (error) {
-			// Delete token if authentication fails
-			request.cookies.delete('token');
-			return NextResponse.redirect(LOGIN);
+			console.error(error);
+			return deleteCookiesAndRedirect(LOGIN);
 		}
 	}
 	let redirectToApp = false;
@@ -66,12 +71,10 @@ export async function middleware(request: NextRequest) {
 				if (payload) {
 					redirectToApp = true;
 				} else {
-					// Delete token
-					request.cookies.delete('token');
+					return deleteCookiesAndRedirect(LOGIN);
 				}
 			} catch (error) {
-				// Delete token
-				request.cookies.delete('token');
+				return deleteCookiesAndRedirect(LOGIN);
 			}
 		}
 	}
