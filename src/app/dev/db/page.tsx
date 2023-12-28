@@ -6,7 +6,7 @@ import ErrorView from '@/components/views/ErrorView';
 import { seedUsers, syncDb } from '@/lib/utils/db/syncDb';
 import { useApp } from '@/contexts/AppContext';
 
-const EXECUTE = false;
+const EXECUTE = true;
 
 export default function SeedDbPage() {
 	const { isLoading, setIsLoading } = useApp();

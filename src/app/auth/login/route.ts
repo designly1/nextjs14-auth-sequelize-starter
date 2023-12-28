@@ -1,9 +1,7 @@
 // src/app/auth/login/route.ts
 import { NextResponse, NextRequest } from 'next/server';
 import { User } from '@/models/associations';
-import { SignJWT } from 'jose';
-import * as log from '@/lib/common/logger';
-import { getJwtSecretKey, setUserDataCookie, checkTurnstileToken } from '@/lib/server/auth';
+import { setUserDataCookie, setJWT, checkTurnstileToken } from '@/lib/server/auth';
 import { apiErrorResponse } from '@/lib/server/api/errorResponse';
 
 export interface I_ApiUserLoginRequest {
@@ -59,40 +57,19 @@ export async function POST(request: NextRequest) {
 		// Check if user is active
 		if (user.status !== 'active') throw new Error('User account is not active');
 
-		/** Check TFA status, reject login and send code */
-		// Create and sign our JWT
-		const token = await new SignJWT({
-			id: user.id,
-			firstName: user.firstName,
-			lastName: user.lastName,
-			email: user.email,
-			phone: user.phone,
-			role: user.role,
-		})
-			.setProtectedHeader({ alg: 'HS256' })
-			.setIssuedAt()
-			.setExpirationTime(`${User.jwtExpires}s`)
-			.sign(getJwtSecretKey());
-
 		// create our response object
 		const res: I_ApiUserLoginResponse = {
 			success: true,
 		};
 		const response = NextResponse.json(res);
 
-		// Store our JWT as a secure, HTTP-only cookie
-		response.cookies.set({
-			name: 'token',
-			value: token,
-			path: '/', // Accessible site-wide
-			maxAge: 86400, // 24-hours or whatever you like
-			httpOnly: true, // This prevents scripts from accessing
-			sameSite: 'strict', // This does not allow other sites to access
-		});
-
 		// Store public user data as a cookie
 		const userData = user.exportPublic();
+
+		// Set auth cookies
 		setUserDataCookie(userData);
+		await setJWT(userData);
+
 		return response;
 	} catch (err: any) {
 		return apiErrorResponse(err);

@@ -1,4 +1,4 @@
-import { jwtVerify, JWTPayload, decodeJwt } from 'jose';
+import { jwtVerify, JWTPayload, decodeJwt, SignJWT } from 'jose';
 import { cookies } from 'next/headers';
 import authConfig from '@/config/authConfig';
 
@@ -104,7 +104,33 @@ export function setUserDataCookie(userData: I_UserPublic) {
 		value: JSON.stringify(userData),
 		path: '/',
 		maxAge: authConfig.jwtExpires,
-		sameSite: 'strict',
+		sameSite: 'lax',
+	});
+}
+
+export async function setJWT(userData: I_UserPublic) {
+	const token = await new SignJWT({
+		id: userData.id,
+		firstName: userData.firstName,
+		lastName: userData.lastName,
+		email: userData.email,
+		phone: userData.phone,
+		role: userData.role,
+	})
+		.setProtectedHeader({ alg: 'HS256' })
+		.setIssuedAt()
+		.setExpirationTime(authConfig.jwtExpiresString)
+		.sign(getJwtSecretKey());
+
+	const cookieStore = cookies();
+
+	cookieStore.set({
+		name: 'token',
+		value: token,
+		path: '/',
+		maxAge: authConfig.jwtExpires,
+		sameSite: 'lax',
+		httpOnly: true,
 	});
 }
 
