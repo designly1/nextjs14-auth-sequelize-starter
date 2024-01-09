@@ -41,7 +41,7 @@ export async function getJwt() {
 
 	if (token) {
 		try {
-			const payload = decodeJwt(token.value);
+			const payload = await verifyJwtToken(token.value);
 			if (payload) {
 				const authPayload: AuthPayload = {
 					id: payload.id as string,
