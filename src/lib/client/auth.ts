@@ -15,3 +15,8 @@ export function getUserData() {
 		return null;
 	}
 }
+
+export function isLoggedIn() {
+	const userData = getUserData();
+	return !!userData;
+}

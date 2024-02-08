@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, FunctionComponent } from 'react';
-import { getUserData } from '@/lib/client/auth';
+import { getUserData, isLoggedIn } from '@/lib/client/auth';
 import { usePathname } from 'next/navigation';
 import { I_UserPublic } from '@/models/User.types';
 import { I_ApiAuthResponse } from '@/app/api/auth/route';
@@ -50,6 +50,8 @@ export const AppProvider: FunctionComponent<AppProviderProps> = ({ children }) =
 		setUserDataLoaded(true);
 	};
 	const loadUserDataFromServer = async () => {
+		if (!isLoggedIn()) return;
+		
 		try {
 			const response = await fetch('/api/auth');
 			const data = (await response.json()) as I_ApiAuthResponse;
